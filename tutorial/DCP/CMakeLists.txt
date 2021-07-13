@@ -18,5 +18,5 @@ install(DIRECTORY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/local)
 install(DIRECTORY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/global)
 install(DIRECTORY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/meta)
 
-add_custom_target(hdDCP mpirun -n 8 --oversubscribe ./hdDCP.exe 64 ./config.DCP.fti)
+add_custom_target(hdDCP mpirun -n 8 $$MPIRUN_ARGS ./hdDCP.exe 64 ./config.DCP.fti)
 add_custom_target(hdDCPrm rm -Rf ./local/* ./global/* ./meta/* COMMAND sed -i 's/failure[ ]\\+= 1/failure = 0/g' config.DCP.fti)

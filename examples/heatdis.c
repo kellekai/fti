@@ -21,7 +21,6 @@
 #define WORKTAG     50
 #define REDUCE      5
 
-
 void initData(int nbLines, int M, int rank, double *h) {
     int i, j;
     for (i = 0; i < nbLines; i++) {
@@ -89,8 +88,11 @@ int main(int argc, char *argv[]) {
     int rank, nbProcs, nbLines, i, M, arg;
     double wtime, *h, *g, memSize, localerror, globalerror = 1;
 
+	int CKPT_LEVEL = atoi(argv[1]);
+	int CKPT_INTERVAL = atoi(argv[2]);
+
     MPI_Init(&argc, &argv);
-    if (FTI_Init(argv[2], MPI_COMM_WORLD) !=  0) {
+    if (FTI_Init(argv[4], MPI_COMM_WORLD) !=  0) {
         printf("FTI could not initialize properly!\n");
         return 1;
     };
@@ -98,7 +100,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(FTI_COMM_WORLD, &nbProcs);
     MPI_Comm_rank(FTI_COMM_WORLD, &rank);
 
-    arg = atoi(argv[1]);
+    arg = atoi(argv[3]);
     M = (int)sqrt((double)(arg * 1024.0 * 512.0 * nbProcs)/sizeof(double));
     nbLines = (M / nbProcs)+3;
     h = (double *) malloc(sizeof(double *) * M * nbLines);
@@ -117,10 +119,18 @@ int main(int argc, char *argv[]) {
     FTI_Protect(1, h, M*nbLines, FTI_DBLE);
     FTI_Protect(2, g, M*nbLines, FTI_DBLE);
 
-    wtime = MPI_Wtime();
-    for (i = 0; i < ITER_TIMES; i++) {
-        int checkpointed = FTI_Snapshot();
-        localerror = doWork(nbProcs, rank, M, nbLines, g, h);
+	if (FTI_Status() != 0) {
+        FTI_Recover();
+	}
+    
+	wtime = MPI_Wtime();
+	for (i = 0; i < ITER_TIMES; i++) {
+       
+	   if (i % CKPT_INTERVAL == 0) {
+			FTI_Checkpoint(i / CKPT_INTERVAL + 1, CKPT_LEVEL);	
+		}
+
+		localerror = doWork(nbProcs, rank, M, nbLines, g, h);
         if (((i%ITER_OUT) == 0) && (rank == 0)) {
             printf("Step : %d, error = %f\n", i, globalerror);
         }
