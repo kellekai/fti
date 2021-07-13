@@ -119,12 +119,13 @@ int main(int argc, char *argv[]) {
     FTI_Protect(1, h, M*nbLines, FTI_DBLE);
     FTI_Protect(2, g, M*nbLines, FTI_DBLE);
 
+	i = 0;
 	if (FTI_Status() != 0) {
         FTI_Recover();
 	}
     
 	wtime = MPI_Wtime();
-	for (i = 0; i < ITER_TIMES; i++) {
+	for (; i < ITER_TIMES; i++) {
        
 	   if (i % CKPT_INTERVAL == 0) {
 			FTI_Checkpoint(i / CKPT_INTERVAL + 1, CKPT_LEVEL);	
