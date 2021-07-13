@@ -14,7 +14,6 @@
 #include <math.h>
 #include <fti.h>
 
-
 #define PRECISION   0.005
 #define ITER_TIMES  5000
 #define ITER_OUT    500
